@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import logo from './media/logo.png';
+import './App.css';
+import { v4 as uuidv4 } from 'uuid';
 
 function App() {
   const [selectedLora, setSelectedLora] = useState('');
@@ -7,10 +9,12 @@ function App() {
   const [positivePrompt, setPositivePrompt] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // Função para abrir o seletor de arquivos
   const handleLoadImage = () => {
     document.getElementById('fileInput').click();
   };
 
+  // Função para manipular a seleção de arquivo
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -19,36 +23,68 @@ function App() {
     }
   };
 
-  const handleGenerateImage = () => {
-    console.log('Gerando nova imagem com prompts:');
-    console.log('Prompt Negativo:', negativePrompt);
-    console.log('Prompt Positivo:', positivePrompt);
+  const handleSubmit = async () => {
+    if (!selectedImage || !positivePrompt || !negativePrompt) {
+      console.log("Preencha todos os campos antes de enviar.");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("photo", document.getElementById('fileInput').files[0]);
+    formData.append("positivePrompt", positivePrompt);
+    formData.append("negativePrompt", negativePrompt);
+  
+    // Debug para verificar o conteúdo do formData
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+  
+    // Gerar um ID temporário no frontend
+    const temporaryId = uuidv4();
+    console.log("ID temporário gerado:", temporaryId);
+  
+    try {
+      const response = await fetch(`http://localhost:8080/customers/${temporaryId}`, {
+        method: "POST",
+        body: formData,
+      });
+  
+      if (response.ok) {
+        console.log("Imagem enviada com sucesso!");
+        // Atualize a URL com o ID temporário (ou o ID retornado, caso possa ser extraído)
+        //window.history.replaceState(null, null, `/customers/${temporaryId}`);
+      } else {
+        console.error("Erro ao enviar a imagem.");
+      }
+    } catch (error) {
+      console.error("Erro de conexão:", error);
+    }
   };
 
   return (
-    <div style={styles.container}>
+    <div className="container">
       {/* Header */}
-      <header style={styles.header}>
-        <img src={logo} alt="Logo" style={styles.logo} />
-        <h1 style={styles.headerTitle}>Crie seu personagem com o DREAM FORGE</h1>
+      <header className="header">
+        <img src={logo} alt="Logo" className="logo" />
+        <h1 className="headerTitle">Crie seu personagem com o DREAM FORGE</h1>
       </header>
 
       {/* Conteúdo Principal */}
-      <div style={styles.mainContent}>
+      <div className="mainContent">
         {/* Coluna Esquerda */}
-        <div style={styles.leftColumn}>
-          <div style={styles.row}>
+        <div className="leftColumn">
+          <div className="row">
             <select
               value={selectedLora}
               onChange={(e) => setSelectedLora(e.target.value)}
-              style={styles.picker}
+              className="picker"
             >
               <option value="">Selecione uma Lora</option>
               <option value="lora1">Lora 1</option>
               <option value="lora2">Lora 2</option>
               <option value="lora3">Lora 3</option>
             </select>
-            <button onClick={handleLoadImage} style={styles.smallButton}>
+            <button onClick={handleLoadImage} className="smallButton">
               Selecione sua imagem
             </button>
             <input
@@ -63,7 +99,7 @@ function App() {
           <input
             type="text"
             placeholder="Prompt Positivo"
-            style={styles.input}
+            className="input"
             value={positivePrompt}
             onChange={(e) => setPositivePrompt(e.target.value)}
           />
@@ -71,22 +107,22 @@ function App() {
           <input
             type="text"
             placeholder="Prompt Negativo"
-            style={styles.input}
+            className="input"
             value={negativePrompt}
             onChange={(e) => setNegativePrompt(e.target.value)}
           />
 
-          <div style={styles.buttonContainer}>
-            <button onClick={handleGenerateImage} style={styles.button}>
+          <div className="buttonContainer">
+            <button onClick={handleSubmit} className="button">
               Gerar Nova Imagem
             </button>
           </div>
         </div>
 
         {/* Coluna Direita */}
-        <div style={styles.rightColumn}>
+        <div className="rightColumn">
           {selectedImage ? (
-            <img src={selectedImage} alt="Imagem Selecionada" style={styles.previewImage} />
+            <img src={selectedImage} alt="Imagem Selecionada" className="previewImage" />
           ) : (
             <p>Nenhuma imagem selecionada</p>
           )}
@@ -94,121 +130,11 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer style={styles.footer}>
+      <footer className="footer">
         <p>© 2024 Dream Forge. Todos os direitos reservados.</p>
       </footer>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#d3dbe0',
-    height: '100vh',
-    padding: '20px',
-    boxSizing: 'border-box',
-  },
-  header: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: '20px',
-  },
-  headerTitle: {
-    fontSize: '40px',
-    fontWeight: 'bold',
-    color: '#FF6B35',
-    marginTop: '50px'
-  },
-  mainContent: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    flex: 1,
-  },
-  leftColumn: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '20px',
-  },
-  rightColumn: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '20px',
-  },
-  logo: {
-    width: '100px',
-    marginBottom: '10px',
-  },
-  row: {
-    display: 'flex',
-    alignItems: 'center',
-    width: '70%',
-    marginBottom: '20px',
-  },
-  picker: {
-    width: '70%',
-    padding: '10px',
-    backgroundColor: '#e0e6ed',
-    color: '#2b2b2b',
-    border: '1px solid #b0b7c3',
-    borderRadius: '5px',
-    marginRight: '10px',
-  },
-  smallButton: {
-    padding: '10px 18px',
-    backgroundColor: '#FF6B35',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  buttonContainer: {
-    width: '70%',
-    marginBottom: '20px',
-  },
-  button: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#FF6B35',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  input: {
-    width: '68%',
-    height: '170px',
-    backgroundColor: '#e0e6ed',
-    color: '#2b2b2b',
-    borderRadius: '5px',
-    padding: '10px',
-    marginBottom: '20px',
-    border: '1px solid #b0b7c3',
-    textAlign: 'center',
-  },
-  previewImage: {
-    maxWidth: '100%',
-    maxHeight: '550px',
-    borderRadius: '10px',
-    marginTop: '20px',
-  },
-  footer: {
-    width: '100%',
-    textAlign: 'center',
-    padding: '10px',
-    backgroundColor: '#FF6B35',
-    color: '#ffffff',
-  },
-};
 
 export default App;
