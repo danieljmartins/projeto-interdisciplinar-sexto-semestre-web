@@ -88,4 +88,8 @@
     font-size: 16px;
   }
   
-  
+  .errorMessage {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+  }

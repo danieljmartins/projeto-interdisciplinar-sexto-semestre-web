@@ -8,10 +8,55 @@ function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [usuario, setUsuario] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Cadastro realizado com:', usuario, email, password);
+
+    // Debug01##
+    console.log('Dados do usuário:');
+    console.log('Usuário:', usuario);
+    console.log('E-mail:', email);
+    console.log('Senha:', password);
+
+    if (!usuario || !email || !password) {
+      setError('Por favor, preencha todos os campos');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    const userData = {
+      login: usuario,
+      senha: password,
+      email: email,
+    };
+
+    try {
+      const response = await fetch('http://localhost:8080/usuarios/cadastrar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Cadastro realizado com sucesso', data);
+        navigate('/');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Erro ao cadastrar usuário');
+      }
+    } catch (err) {
+      console.error('Erro ao se comunicar com o servidor', err);
+      setError('Erro ao se comunicar com o servidor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVoltar = () => {
@@ -44,11 +89,9 @@ function Signup() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button 
-            type="submit" 
-            className="signupButton"
-          >
-            Criar Conta
+          {error && <p className="errorMessage">{error}</p>} {/* Exibe erro se houver */}
+          <button type="submit" className="signupButton" disabled={loading}>
+            {loading ? 'Cadastrando...' : 'Criar Conta'}
           </button>
         </form>
         <button onClick={handleVoltar} className="voltarButton">

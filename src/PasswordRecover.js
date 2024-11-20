@@ -4,55 +4,53 @@ import { useNavigate } from 'react-router-dom';
 
 function PasswordRecover() {
   const navigate = useNavigate();
-
+  
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [usuario, setUsuario] = useState('');
+  const [messageVisible, setMessageVisible] = useState(false); // Controla a exibição da mensagem de sucesso
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (!email) {
+      alert('Por favor, insira um e-mail válido');
+      return;
+    }
+
+    console.log('Enviando solicitação para o e-mail:', email);
+
+    setMessageVisible(true);
   };
 
-  const handleVoltar = () => {
+  const handleBack = () => {
     navigate('/');
   };
 
   return (
     <div className="passwordRecoverContainer">
       <div className="passwordRecoverCard">
-        <h1 className="passwordRecoverTitle">Recuperar Senha</h1>
-        <form className="passwordRecoverForm" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Usuário"
-            className="passwordRecoverInput"
-            value={usuario}
-            onChange={(e) => setUsuario(e.target.value)}
-          />
-          <input
-            type="email"
-            placeholder="E-mail"
-            className="passwordRecoverInput"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            className="passwordRecoverInput"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button 
-            type="submit" 
-            className="passwordRecoverButton"
-          >
-            Recuperar Senha
-          </button>
-        </form>
-        <button onClick={handleVoltar} className="voltarButton">
-          Voltar
-        </button>
+        {!messageVisible ? (
+          <>
+            <h1 className="passwordRecoverTitle">Recuperação de Senha</h1>
+            <p className="passwordRecoverSubtitle">Informe seu e-mail para recuperar a senha</p>
+            <form className="passwordRecoverForm" onSubmit={handleSubmit}>
+              <input
+                type="email"
+                placeholder="E-mail"
+                className="passwordRecoverInput"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button type="submit" className="passwordRecoverButton">
+                Enviar
+              </button>
+            </form>
+            <button onClick={handleBack} className="voltarButton">
+              Voltar
+            </button>
+          </>
+        ) : (
+          <p className="successMessage">Email enviado!</p>
+        )}
       </div>
     </div>
   );
